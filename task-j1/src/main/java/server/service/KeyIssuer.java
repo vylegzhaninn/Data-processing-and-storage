@@ -40,18 +40,25 @@ public class KeyIssuer {
 
     private final X500Name issuerName;
     private final PrivateKey caKey;
+    private final int keySize;
     private final AtomicInteger serialNumber = new AtomicInteger();
 
     public KeyIssuer(String issuerName, PrivateKey caKey) {
+        this(issuerName, caKey, KEY_SIZE);
+    }
+
+    /** Размер ключа — параметр, чтобы тесты не ждали генерацию 8192 бит. */
+    public KeyIssuer(String issuerName, PrivateKey caKey, int keySize) {
         this.issuerName = new X500Name(issuerName);
         this.caKey = caKey;
+        this.keySize = keySize;
     }
 
     /** Генерация пары ключей и подпись сертификата. Вызывается только генерирующими нитями. */
     public User issue(String name) throws Exception {
         long startTime = System.currentTimeMillis();
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(KEY_SIZE);
+        keyPairGenerator.initialize(keySize);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
         Instant now = Instant.now();
