@@ -1,0 +1,5 @@
+/.idea/
+.DS_Store
+task-j1/.gradle/
+task-j1/build/
+task-j1/resources/
