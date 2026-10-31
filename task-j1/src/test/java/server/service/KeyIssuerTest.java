@@ -1,6 +1,7 @@
 package server.service;
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -63,6 +64,13 @@ class KeyIssuerTest {
                 new RSAPublicKeySpec(crtKey.getModulus(), crtKey.getPublicExponent()));
     }
 
+    private static PublicKey parsePublicKey(String pem) throws Exception {
+        try (PEMParser parser = new PEMParser(new StringReader(pem))) {
+            SubjectPublicKeyInfo info = (SubjectPublicKeyInfo) parser.readObject();
+            return new JcaPEMKeyConverter().getPublicKey(info);
+        }
+    }
+
     @Test
     void issuedUserCarriesMatchingKeyAndCertificate() throws Exception {
         KeyPair ca = generateKeyPair(2048);
@@ -77,9 +85,9 @@ class KeyIssuerTest {
         assertEquals(ISSUER, certificate.getIssuerX500Principal().getName());
         assertEquals(TEST_KEY_SIZE, ((RSAPrivateCrtKey) privateKey).getModulus().bitLength());
 
-        // публичный ключ сертификата соответствует выданному приватному ключу
         assertArrayEquals(publicKeyOf(privateKey).getEncoded(), certificate.getPublicKey().getEncoded());
-        // подпись сертификата сходится с ключом CA
+        PublicKey issuedPublicKey = parsePublicKey(user.keys().publicKey());
+        assertArrayEquals(issuedPublicKey.getEncoded(), certificate.getPublicKey().getEncoded());
         certificate.verify(ca.getPublic());
 
         Date now = new Date();

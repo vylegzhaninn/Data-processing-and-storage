@@ -73,7 +73,7 @@ public class KeyIssuer {
         var certificate = new JcaX509CertificateConverter().getCertificate(certificateBuilder.build(signer));
 
         System.out.printf("[gen] %s in %d ms%n", name, System.currentTimeMillis() - startTime);
-        return new User(name, new RSAKeys(toPem(keyPair.getPrivate()), toPem(certificate)));
+        return new User(name, new RSAKeys(toPem(keyPair.getPrivate()), toPem(keyPair.getPublic()), toPem(certificate)));
     }
 
     /** Subject DN с CN = переданному имени; builder сам корректно обрабатывает спецсимволы. */

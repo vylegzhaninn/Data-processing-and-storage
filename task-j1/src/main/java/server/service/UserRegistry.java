@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * получает тот же future, поэтому пара ключей создаётся ровно один раз.
  * Единственная ответственность (SRP) — дедупликация запросов по имени.
  */
-public class UserRegistry implements KeyService {
+public class UserRegistry {
 
     private final Map<String, CompletableFuture<User>> usersByName = new ConcurrentHashMap<>();
     private final BlockingQueue<GenRequest> requestQueue;
@@ -23,7 +23,6 @@ public class UserRegistry implements KeyService {
         this.requestQueue = requestQueue;
     }
 
-    @Override
     public CompletableFuture<User> getOrCreate(String name) {
         return usersByName.computeIfAbsent(name, n -> {
             CompletableFuture<User> future = new CompletableFuture<>();

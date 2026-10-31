@@ -67,16 +67,18 @@ public class Sender implements Runnable {
         }
     }
 
-    /** Кадр ответа: [длина ключа][PEM ключа][длина сертификата][PEM сертификата]. */
+    /** Кадр ответа: [длина приватного ключа][PEM][длина публичного ключа][PEM][длина сертификата][PEM]. */
     private static byte[] encodeResponse(User user) {
         if (user == null) {
-            return new byte[8];
+            return new byte[12];
         }
         RSAKeys keys = user.keys();
-        byte[] key = keys.privateKey().getBytes(StandardCharsets.US_ASCII);
+        byte[] privateKey = keys.privateKey().getBytes(StandardCharsets.US_ASCII);
+        byte[] publicKey = keys.publicKey().getBytes(StandardCharsets.US_ASCII);
         byte[] certificate = keys.certificate().getBytes(StandardCharsets.US_ASCII);
-        return ByteBuffer.allocate(8 + key.length + certificate.length)
-                .putInt(key.length).put(key)
+        return ByteBuffer.allocate(12 + privateKey.length + publicKey.length + certificate.length)
+                .putInt(privateKey.length).put(privateKey)
+                .putInt(publicKey.length).put(publicKey)
                 .putInt(certificate.length).put(certificate)
                 .array();
     }

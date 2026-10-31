@@ -1,7 +1,7 @@
 package server.net;
 
 import server.model.Response;
-import server.service.KeyService;
+import server.service.UserRegistry;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,19 +15,19 @@ import java.util.concurrent.BlockingQueue;
 
 /**
  * Коммуникационная нить — Reactor: selector-петля на прием соединений и чтение
- * запросов. Имя после разбора уходит в KeyService (очередь генерации); доставка
+ * запросов. Имя после разбора уходит в UserRegistry (очередь генерации); доставка
  * результата происходит через очередь ответов, которую разбирают передающие нити
- * (Sender). О домене знает только через абстракцию KeyService (DIP).
+ * (Sender).
  */
 public class NioServer {
 
     private final int port;
-    private final KeyService keyService;
+    private final UserRegistry userRegistry;
     private final BlockingQueue<Response> responseQueue;
 
-    public NioServer(int port, KeyService keyService, BlockingQueue<Response> responseQueue) {
+    public NioServer(int port, UserRegistry userRegistry, BlockingQueue<Response> responseQueue) {
         this.port = port;
-        this.keyService = keyService;
+        this.userRegistry = userRegistry;
         this.responseQueue = responseQueue;
     }
 
@@ -79,7 +79,7 @@ public class NioServer {
         readBuffer.flip();
 
         for (String name : connection.extractNames(readBuffer)) {
-            keyService.getOrCreate(name).whenComplete((user, error) ->
+            userRegistry.getOrCreate(name).whenComplete((user, error) ->
                     responseQueue.add(new Response(channel, connection.writeLock, error == null ? user : null)));
         }
     }

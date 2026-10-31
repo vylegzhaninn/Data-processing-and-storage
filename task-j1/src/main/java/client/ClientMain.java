@@ -56,14 +56,18 @@ public class ClientMain {
                 System.err.println("server failed to generate keys");
                 System.exit(1);
             }
-            String key = new String(readFully(serverResponse, keyLen), StandardCharsets.US_ASCII);
+            String privateKey = new String(readFully(serverResponse, keyLen), StandardCharsets.US_ASCII);
+            int publicKeyLen = serverResponse.readInt();
+            String publicKey = new String(readFully(serverResponse, publicKeyLen), StandardCharsets.US_ASCII);
             int certLen = serverResponse.readInt();
             String certificate = new String(readFully(serverResponse, certLen), StandardCharsets.US_ASCII);
 
             Files.createDirectories(OUTPUT_DIR);
-            Files.writeString(OUTPUT_DIR.resolve(name + ".key"), key);
+            Files.writeString(OUTPUT_DIR.resolve(name + ".key"), privateKey);
+            Files.writeString(OUTPUT_DIR.resolve(name + ".pub"), publicKey);
             Files.writeString(OUTPUT_DIR.resolve(name + ".crt"), certificate);
-            System.out.println("saved " + OUTPUT_DIR.resolve(name + ".key") + " and " + OUTPUT_DIR.resolve(name + ".crt"));
+            System.out.println("saved " + OUTPUT_DIR.resolve(name + ".key") + ", "
+                    + OUTPUT_DIR.resolve(name + ".pub") + " and " + OUTPUT_DIR.resolve(name + ".crt"));
         }
     }
 

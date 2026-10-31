@@ -7,7 +7,6 @@ import server.model.Response;
 import server.service.Generator;
 import server.service.KeyIssuer;
 import server.service.UserRegistry;
-import server.model.GenRequest;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
